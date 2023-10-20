@@ -25,18 +25,18 @@ data[['home_score', 'away_score']] = data['FT'].str.split('-', expand=True).asty
 data['outcome'] = np.where(data['home_score'] > data['away_score'], 0, np.where(data['home_score'] == data['away_score'], 1, 2))
 
 # Define features and target
-X = data[['home_score', 'away_score']].values
+X = data[['Team1', 'Team2']].values
 y = data['outcome'].values
 
 # Split the data into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
 # Define a simple feedforward neural network using PyTorch
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.fc1 = nn.Linear(2, 32)
-        self.fc2 = nn.Linear(32, 3)  # 3 output classes (Win, Draw, Lose)
+        self.fc1 = nn.Linear(2, 128)
+        self.fc2 = nn.Linear(128, 64)
+        self.fc3 = nn.Linear(64, 3)  # 3 output classes (Win, Draw, Lose)
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
