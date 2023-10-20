@@ -1,13 +1,19 @@
+"""
+Trains and tests a model based on the scraped data from fbref
+"""
 import pandas as pd
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.optim as optim
+from torch import nn
+from torch import optim
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score, classification_report
 
 def data_prep(file_path):
+    """
+    Preps the data for training and testing
+    """
     # Load the CSV data into a Pandas DataFrame
     data = pd.read_csv(file_path)
 
@@ -23,7 +29,8 @@ def data_prep(file_path):
     data[['home_score', 'away_score']] = data['FT'].str.split('-', expand=True).astype(int)
 
     # Create a target variable (match outcome) as numerical labels (0 for Win, 1 for Draw, 2 for Lose)
-    data['outcome'] = np.where(data['home_score'] > data['away_score'], 0, np.where(data['home_score'] == data['away_score'], 1, 2))
+    data['outcome'] = np.where(data['home_score'] > data['away_score'], 0,
+                              np.where(data['home_score'] == data['away_score'], 1, 2))
 
     # Define features and target
     X = data[['Team1', 'Team2']].values
@@ -35,18 +42,24 @@ def data_prep(file_path):
 
 # Define a simple feedforward neural network using PyTorch
 class Net(nn.Module):
+    """
+    Defines a simple feedforward neural net
+    """
     def __init__(self):
-        super(Net, self).__init__()
+        super().__init__()
         self.fc1 = nn.Linear(2, 128)
         self.fc2 = nn.Linear(128, 64)
         self.fc3 = nn.Linear(64, 3)  # 3 output classes (Win, Draw, Lose)
 
     def forward(self, x):
-        x = torch.relu(self.fc1(x))
+        x = nn.functional.relu(self.fc1(x))
         x = self.fc2(x)
         return x
 
 def train(X_train, X_test, y_train, y_test):
+    """
+    Trains and tests the Net model with the prepped data
+    """
     # Initialize the model, loss function, and optimizer
     model = Net()
     criterion = nn.CrossEntropyLoss()
@@ -54,7 +67,7 @@ def train(X_train, X_test, y_train, y_test):
 
     # Training the model
     num_epochs = 100
-    for epoch in range(num_epochs):
+    for _ in range(num_epochs):
         inputs = torch.tensor(X_train, dtype=torch.float32)
         labels = torch.tensor(y_train, dtype=torch.long)
 
@@ -77,5 +90,6 @@ def train(X_train, X_test, y_train, y_test):
     print("Accuracy:", accuracy)
     print("Classification Report:\n", report)
 
-X_train, X_test, y_train, y_test = data_prep('data/cleaned_fixture_results.csv')
-train(X_train, X_test, y_train, y_test)
+if __name__ == "__main__":
+    X_train, X_test, y_train, y_test = data_prep('data/cleaned_fixture_results.csv')
+    train(X_train, X_test, y_train, y_test)
