@@ -4,6 +4,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 
 # Define a list of seasons to loop through
+# FBRef limit of 20 calls
 seasons = range(2020, 2023)
 
 # Initialize an empty list to store all data
