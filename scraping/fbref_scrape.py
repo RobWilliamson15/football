@@ -79,7 +79,7 @@ for season in seasons:
         # Append the data for this season to the overall data list
         all_data.extend(main_list)
 
-with open('../data/fixture_results.csv', 'w', newline='', encoding="utf-8") as file:
+with open('./data/fixture_results.csv', 'w', newline='', encoding="utf-8") as file:
     writer = csv.writer(file)
     writer.writerow(["Round", "Date", "Team 1", "FT", "Team 2"])
     for row in all_data:
