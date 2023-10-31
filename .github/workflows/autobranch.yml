@@ -1,0 +1,20 @@
+name: Auto Branch on In Progress
+
+on:
+  issues:
+    types:
+      - edited
+
+jobs:
+  autobranch:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Create branch
+      if: github.event.issue.project_card.column_name == 'In progress'
+      run: |
+        git checkout -b feature/${{ github.event.issue.number }}-${{ github.event.issue.title }}
+        git push origin feature/${{ github.event.issue.number }}-${{ github.event.issue.title }}
