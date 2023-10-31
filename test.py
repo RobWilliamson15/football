@@ -5,6 +5,9 @@ import pandas as pd
 import numpy as np
 import torch
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 from torch import nn
 from torch import optim
 from sklearn.model_selection import train_test_split
@@ -73,6 +76,10 @@ def train(X_train, X_test, y_train, y_test):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.9)  # Reduce LR by 10% every 10 epochs
+    
+    # Lists to store loss values for plotting
+    train_losses = []
+    val_losses = []
 
     num_epochs = 150
     for epoch in range(num_epochs):
@@ -95,8 +102,23 @@ def train(X_train, X_test, y_train, y_test):
             val_labels = torch.tensor(y_test, dtype=torch.long)
             val_outputs = model(val_inputs)
             val_loss = criterion(val_outputs, val_labels)
+
+        # Append the loss values to the lists
+        train_losses.append(loss.item())
+        val_losses.append(val_loss.item())
         
         print(f"Epoch {epoch+1}/{num_epochs}, Loss: {loss.item()}, Val Loss: {val_loss.item()}")
+    
+    # Plotting the Training and Validation Loss
+    plt.figure(figsize=(10, 5))
+    plt.plot(train_losses, label='Training Loss')
+    plt.plot(val_losses, label='Validation Loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.title('Training and Validation Loss Over Epochs')
+    plt.savefig("training_validation_loss.png")   # Save the figure to a PNG
+    plt.show()
 
     # Making predictions
     with torch.no_grad():
@@ -110,6 +132,16 @@ def train(X_train, X_test, y_train, y_test):
 
     print("Accuracy:", accuracy)
     print("Classification Report:\n", report)
+
+    # Confusion Matrix Visualization
+    cm = confusion_matrix(y_test, predicted_labels)
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, cmap='Blues', fmt='g')
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.title('Confusion Matrix')
+    plt.savefig("confusion_matrix.png")   # Save the figure to a PNG
+    plt.show()
 
 if __name__ == "__main__":
     X_train, X_test, y_train, y_test = data_prep('data/cleaned_fixture_results.csv')
