@@ -117,7 +117,7 @@ def train(X_train, X_test, y_train, y_test):
     plt.ylabel('Loss')
     plt.legend()
     plt.title('Training and Validation Loss Over Epochs')
-    plt.savefig("training_validation_loss.png")   # Save the figure to a PNG
+    #plt.savefig("training_validation_loss.png")   # Save the figure to a PNG
     plt.show()
 
     # Making predictions
@@ -140,7 +140,7 @@ def train(X_train, X_test, y_train, y_test):
     plt.xlabel('Predicted')
     plt.ylabel('True')
     plt.title('Confusion Matrix')
-    plt.savefig("confusion_matrix.png")   # Save the figure to a PNG
+    #plt.savefig("confusion_matrix.png")   # Save the figure to a PNG
     plt.show()
 
 if __name__ == "__main__":
