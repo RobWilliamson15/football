@@ -4,6 +4,7 @@ Trains and tests a model based on the scraped data from fbref
 import pandas as pd
 import numpy as np
 import torch
+import torch.nn.functional as F
 from torch import nn
 from torch import optim
 from sklearn.model_selection import train_test_split
@@ -47,13 +48,20 @@ class Net(nn.Module):
     """
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(2, 128)
-        self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, 3)  # 3 output classes (Win, Draw, Lose)
+        self.fc1 = nn.Linear(2, 256)
+        self.fc2 = nn.Linear(256, 128)
+        self.dropout1 = nn.Dropout(0.5)
+        self.fc3 = nn.Linear(128, 64)
+        self.dropout2 = nn.Dropout(0.5)
+        self.fc4 = nn.Linear(64, 3)
 
     def forward(self, x):
-        x = nn.functional.relu(self.fc1(x))
-        x = self.fc2(x)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.dropout1(x)
+        x = F.relu(self.fc3(x))
+        x = self.dropout2(x)
+        x = self.fc4(x)
         return x
 
 def train(X_train, X_test, y_train, y_test):
@@ -64,25 +72,38 @@ def train(X_train, X_test, y_train, y_test):
     model = Net()
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=0.001)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.9)  # Reduce LR by 10% every 10 epochs
 
-    # Training the model
-    num_epochs = 100
-    for _ in range(num_epochs):
+    num_epochs = 150
+    for epoch in range(num_epochs):
         inputs = torch.tensor(X_train, dtype=torch.float32)
         labels = torch.tensor(y_train, dtype=torch.long)
 
+        # Training step
+        model.train()
         optimizer.zero_grad()
         outputs = model(inputs)
         loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
+        scheduler.step()
+
+        # Validation step
+        model.eval()
+        with torch.no_grad():
+            val_inputs = torch.tensor(X_test, dtype=torch.float32)
+            val_labels = torch.tensor(y_test, dtype=torch.long)
+            val_outputs = model(val_inputs)
+            val_loss = criterion(val_outputs, val_labels)
+        
+        print(f"Epoch {epoch+1}/{num_epochs}, Loss: {loss.item()}, Val Loss: {val_loss.item()}")
 
     # Making predictions
     with torch.no_grad():
         test_inputs = torch.tensor(X_test, dtype=torch.float32)
         predictions = model(test_inputs)
         predicted_labels = np.argmax(predictions, axis=1)
-
+        
     # Evaluate the model
     accuracy = accuracy_score(y_test, predicted_labels)
     report = classification_report(y_test, predicted_labels)
