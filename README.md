@@ -41,3 +41,7 @@ clean_data.py reads a CSV file containing Premier League fixture results, cleans
 ## Requirements
 
 The code snippets have specific library requirements, which are mentioned in each snippet's description. You can install the required libraries using `pip install <library-name>` or by running `pip install -r requirements.txt`
+
+## Model Results
+![Training and Validation Loss](training_validation_loss.png)
+![Confusion Matrix](confusion_matrix.png)
