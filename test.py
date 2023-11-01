@@ -1,18 +1,16 @@
 """
 Trains and tests a model based on the scraped data from fbref
 """
-import pandas as pd
-import numpy as np
 import torch
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, accuracy_score, classification_report
 import seaborn as sns
-from torch import nn
-from torch import optim
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import accuracy_score, classification_report
+from torch import nn, optim
+import numpy as np
 
 def data_prep(file_path):
     """
@@ -144,5 +142,5 @@ def train(X_train, X_test, y_train, y_test):
     plt.show()
 
 if __name__ == "__main__":
-    X_train, X_test, y_train, y_test = data_prep('data/cleaned_fixture_results.csv')
-    train(X_train, X_test, y_train, y_test)
+    TRAIN_DATA, TEST_DATA, TRAIN_LABELS, TEST_LABELS = data_prep('data/csv/cleaned_fixture_results.csv')
+    train(TRAIN_DATA, TEST_DATA, TRAIN_LABELS, TEST_LABELS)

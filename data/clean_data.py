@@ -1,32 +1,40 @@
+"""
+Cleans data that is read from a csv
+"""
 import pandas as pd
 
 def read_and_clean(file_name='./csv/fixture_results.csv'):
+    """
+    Reads data from csv and cleans it
+    """
     # Read the CSV file (assuming it's named 'matches.csv')
-    df = pd.read_csv(file_name, sep=',')
+    fixture_df = pd.read_csv(file_name, sep=',')
 
     # Rename columns for clarity
-    df.columns = ['Round', 'Date', 'Team1', 'FT', 'Team2']
+    fixture_df.columns = ['Round', 'Date', 'Team1', 'FT', 'Team2']
 
     # Replace the special characters with a hyphen (if needed)
-    df['FT'] = df['FT'].str.replace('‚Äì', '-')
+    fixture_df['FT'] = fixture_df['FT'].str.replace('‚Äì', '-')
 
     # Convert the 'Date' column to a proper datetime format
-    df['Date'] = pd.to_datetime(df['Date'], format='%a %b %d %Y')
-    
-    # Apply the function to create a new 'Result' column
-    df['Result'] = df.apply(determine_result, axis=1)
+    fixture_df['Date'] = pd.to_datetime(fixture_df['Date'], format='%a %b %d %Y')
 
-    return df
+    # Apply the function to create a new 'Result' column
+    fixture_df['Result'] = fixture_df.apply(determine_result, axis=1)
+
+    return fixture_df
 
 # Define a function to determine the result based on the scores
 def determine_result(row):
+    """
+    Determines the result as H, A or D
+    """
     team1_score, team2_score = map(int, row['FT'].replace('–', '-').split('-'))
     if team1_score > team2_score:
         return 'H'  # Home Win
-    elif team1_score < team2_score:
+    if team1_score < team2_score:
         return 'A'  # Away Win
-    else:
-        return 'D'  # Draw
+    return 'D'  # Draw
 
 
 if __name__ == "__main__":
